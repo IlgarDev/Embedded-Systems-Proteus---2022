@@ -1,0 +1,192 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              01/12/2022 20:46:28 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OMF2 OPTIMIZE(8,SPEED) BROWSE DEBUG PRINT(.\Listings\main.lst) TA
+                    -BS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include <REGX52.H>
+   2          
+   3          unsigned char code Tab[]={0x7F,0xBF,0xDF,0xEF};
+   4          unsigned char data ind;
+   5          unsigned char bdata Key;
+   6          bit Enable;
+   7          sbit Key_1 = Key^1;
+   8          sbit Key_2 = Key^2;
+   9          sbit Key_3 = Key^3;
+  10          int speed = 40;
+  11          int isOff = 1;
+  12          int default_speed = 40;
+  13          int number_pressed = 0;
+  14          
+  15          
+  16          void Send(unsigned char Value)
+  17          {
+  18   1        P3_4 = 1;
+  19   1          TI = 0;
+  20   1          SBUF = Value;
+  21   1          while(TI==0){;}
+  22   1        P3_4 = 0;
+  23   1      }
+  24          
+  25          void Setup(void)
+  26          {
+  27   1        P3_4 = 0;
+  28   1        Enable = 1;
+  29   1        ind=0;
+  30   1        SCON = 0x50;
+  31   1        T2CON = 0x30;
+  32   1        TH2 = RCAP2H = 0xFF;
+  33   1        TL2 = RCAP2L = 0xDC;
+  34   1        TR2 = 1;
+  35   1      }
+  36          
+  37          void wait(void)
+  38          {
+  39   1        unsigned char data x,y;
+  40   1        for(x=0;x<=speed;x++)
+  41   1          for(y=0;y<=speed;y++){;}
+  42   1      }
+  43          
+  44          
+  45          void MakeLights(int count){
+  46   1        int i;
+  47   1        for (i = 1; i <= count; ++i)
+  48   1        {
+  49   2          P0_0 = 0;
+  50   2          wait();
+  51   2          P0_0 = 1;
+  52   2          wait();
+  53   2        }
+  54   1      }
+C51 COMPILER V9.60.0.0   MAIN                                                              01/12/2022 20:46:28 PAGE 2   
+
+  55          
+  56          int OnOffLed(){
+  57   1        if (isOff){
+  58   2            isOff = 0;
+  59   2            return 0;
+  60   2        }else{
+  61   2          isOff = 1;
+  62   2          return 1;
+  63   2        }
+  64   1      }
+  65          
+  66          void UpdateSpeed(){
+  67   1        speed = number_pressed * 10;
+  68   1      }
+  69          
+  70          void ResetSpeed(){
+  71   1        speed = default_speed;
+  72   1      }
+  73          
+  74          
+  75          
+  76          
+  77          
+  78          void main(void)
+  79          {
+  80   1        unsigned char data Record[]={0x00,0x00,0x00};
+  81   1        unsigned char index=0;
+  82   1        
+  83   1        Setup(); 
+  84   1        while(1)
+  85   1        {
+  86   2          P2 = Tab[ind];
+  87   2          Key = P2;
+  88   2          if((Key_1 & Key_2 & Key_3)==0)
+  89   2           {
+  90   3             if(Enable==1)
+  91   3             {
+  92   4              switch(Key){
+  93   5                case 0xE7:
+  94   5                  Send('1');
+  95   5                  MakeLights(1);
+  96   5                  number_pressed = 1;
+  97   5                  break;
+  98   5                case 0xEB:
+  99   5                  Send('2');
+ 100   5                  MakeLights(2);
+ 101   5                  number_pressed = 2;
+ 102   5                  break;
+ 103   5                case 0xED:
+ 104   5                  Send('3');
+ 105   5                  MakeLights(3);
+ 106   5                  number_pressed = 3;
+ 107   5                  break;
+ 108   5                case 0xD7:
+ 109   5                  Send('4');
+ 110   5                  MakeLights(4);
+ 111   5                  number_pressed = 4;
+ 112   5                  break;
+ 113   5                case 0xDB:
+ 114   5                  Send('5');
+ 115   5                  MakeLights(5);
+ 116   5                  number_pressed = 5;
+C51 COMPILER V9.60.0.0   MAIN                                                              01/12/2022 20:46:28 PAGE 3   
+
+ 117   5                  break;
+ 118   5                case 0xDD:
+ 119   5                  Send('6');
+ 120   5                  MakeLights(6);
+ 121   5                  number_pressed = 6;
+ 122   5                  break;
+ 123   5                case 0xB7:
+ 124   5                  Send('7');
+ 125   5                  MakeLights(7);
+ 126   5                  number_pressed = 7;
+ 127   5                  break;
+ 128   5                case 0xBB:
+ 129   5                  Send('8');
+ 130   5                  MakeLights(8);
+ 131   5                  number_pressed = 8;
+ 132   5                  break;
+ 133   5                case 0xBD:
+ 134   5                  Send('9');
+ 135   5                  MakeLights(9);
+ 136   5                  number_pressed = 9;
+ 137   5                  break;
+ 138   5                case 0x77:
+ 139   5                  Send('*');
+ 140   5                  UpdateSpeed();
+ 141   5                  break;
+ 142   5                case 0x7B:
+ 143   5                  Send('0');
+ 144   5                  P0_0 = OnOffLed();
+ 145   5                  break;
+ 146   5                case 0x7D:
+ 147   5                  Send('#');
+ 148   5                  ResetSpeed();
+ 149   5                  break;
+ 150   5              }
+ 151   4               Enable = 1; 
+ 152   4             }   
+ 153   3           }
+ 154   2          else
+ 155   2           {      
+ 156   3             if(ind<0x03) {ind++;} else{ind=0x00;}
+ 157   3             Enable = 1;
+ 158   3           }  
+ 159   2        }
+ 160   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    507    ----
+   CONSTANT SIZE    =      7    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     10       4
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      1    ----
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
